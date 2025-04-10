@@ -73,9 +73,8 @@ class Mesh:
         neumann_nodes= (self.node_list[i] for i in range(91, 101))
         neumann_nodes_inside= (self.node_list[i] for i in range(11, 91))
         return dirichlet_nodes, neumann_nodes, neumann_nodes_inside
+    
     def plot_mesh(self):
-        
-
         # Get coordinates
         x, y = self.coordinates()
 
