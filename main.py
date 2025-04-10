@@ -35,12 +35,10 @@ def main():
         
         # Assemble global stiffness matrix
         element_nodes_ids = [mesh.elements[element_id-1].n1.id, mesh.elements[element_id-1].n2.id, mesh.elements[element_id-1].n3.id]
-        print("Element id", element_id, "element_nodes", element_nodes_ids)
         for row_e in range(H_e.shape[0]):
             global_row_idx = element_nodes_ids[row_e] - 1
             for col_e in range(H_e.shape[1]):
                 global_col_idx = element_nodes_ids[col_e] - 1
-                print("global_row_idx", global_row_idx, "global_col_idx", global_col_idx)
                 H[global_row_idx][global_col_idx] += H_e[row_e][col_e]
                 
 

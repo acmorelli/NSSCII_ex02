@@ -33,13 +33,9 @@ class Mesh:
         n = int(math.sqrt(N))
         # Create nodes with correct numbering
         x_coords, y_coords = self.coordinates()
-        print("x_coords", x_coords)
-        print("y_coords", y_coords)
         for i in range(N):
             x = x_coords[i]
             y = y_coords[i]
-            print("x", x)
-            print("y", y)
             self.nodes.append(Node(i+1, x, y))
 
     
