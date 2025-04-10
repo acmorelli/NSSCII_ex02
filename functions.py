@@ -1,7 +1,7 @@
 from min_FEM import *
 import numpy as np
 
-def compute_local_stiffness_matrix(k, tri_id, mesh):
+def compute_local_stiffness_matrix(k, element_id, mesh):
     # k: heat conductivity coefficient
     # tri_id: id of the triangle in the mesh
     # mesh: mesh object
@@ -9,7 +9,7 @@ def compute_local_stiffness_matrix(k, tri_id, mesh):
     H_e = np.zeros((3, 3)) # local stiffness matrix
 
     # get element
-    element = mesh.triangles[tri_id]
+    element = mesh.elements[element_id-1]
     # coefficients
     b = np.array(element.b_coeffs())
     c = np.array(element.c_coeffs())

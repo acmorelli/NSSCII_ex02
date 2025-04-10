@@ -39,16 +39,16 @@ class Triangle: # element class
         return 0.5 * abs(x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2))
     def b(self, i, j):
         """X coord diff between each node of the triangle"""
-        return i.x - j.x
+        return i.y - j.y
     def c(self, i, j):
         """Y coord diff between each node of the triangle"""
-        return i.y - j.y
+        return i.x - j.x
     def b_coeffs(self): 
         """b coefficients for the triangle"""
-        return [self.b(self.n1, self.n2), self.b(self.n2, self.n3), self.b(self.n3, self.n1)]
+        return [self.b(self.n2, self.n3), self.b(self.n3, self.n1), self.b(self.n1, self.n2)]
     def c_coeffs(self): 
         """c coefficients for the triangle"""
-        return [self.c(self.n1, self.n2), self.c(self.n2, self.n3), self.c(self.n3, self.n1)]
+        return [self.c(self.n3, self.n2), self.c(self.n1, self.n3), self.c(self.n2, self.n1)]
     def local_stiffness_matrix(self): #CHECK
         # k is element dependent 
         A = self.area()
