@@ -40,6 +40,13 @@ def main():
             for col_e in range(H_e.shape[1]):
                 global_col_idx = element_nodes_ids[col_e] - 1
                 H[global_row_idx][global_col_idx] += H_e[row_e][col_e]
+
+        # take into account the Dirichlet boundary conditions
+
+        # solve the system of equations
+
+        # post processing
+        
                 
 
     
