@@ -2,29 +2,20 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from matplotlib.tri import Triangulation
+from min_FEM import *
 
 class Mesh:
-    #TO DO 
-    #1-->100 points  YES
-    #2-->N1(0,0), N10(L,0),N100,(L,L) YES
-    #3-->Element connectivity scheme  where every element En is assigned such as E1(N1,N2,N11)
-    #Counterclockwise nodal assignment has to be used YES
-
-    #-->Boundary conditions: N1- N10 Dirichlet BCs
-    #-->N91 – N100: Neumann BCs 
-    #-->o,w,Neumann BCs P=0
-    
-    #IS IT COMPLETED UNTIL HERE? :  NO
-
-    #6 Variations of mesh also have to be solved
-
-    # After Mesh creation one have to divide L(length on both x and y axis) and hz(tickness at z axis) 
-    # to meshing for group specific work
-
     def __init__(self, N):
         self.N = N
-        self.node_list = []
-        self.elements=[]  # Initialize node list
+        self.nodes = []  # Initialize node list
+        self.elements = []
+
+        self.create_nodes(N)
+        self.create_elements(N)
+
+        
+        self.neumann_nodes, self.dirichlet_nodes, self.neumann_nodes_inside = self.boundary_conditiones()
+    
     
     def coordinates(self):
         L = 1.0  # Length of the domain
@@ -34,24 +25,28 @@ class Mesh:
         X, Y = np.meshgrid(x, y)
         return X.flatten(), Y.flatten()
     
-    def transforrm():
+    def transform():
         return None
     
-    def nodes(self, N):
-        self.node_list = []
+    def create_nodes(self, N):
+        # self.node_list = []
         n = int(math.sqrt(N))
         # Create nodes with correct numbering
-        for j in range(n):
-            for i in range(n):
-                node_num = j * n + i + 1  # 1-based numbering
-                self.node_list.append(node_num)
-        print(self.node_list)
-        return self.node_list 
+        x_coords, y_coords = self.coordinates()
+        print("x_coords", x_coords)
+        print("y_coords", y_coords)
+        for i in range(N):
+            x = x_coords[i]
+            y = y_coords[i]
+            print("x", x)
+            print("y", y)
+            self.nodes.append(Node(i+1, x, y))
+
     
     def get_node(self, index):
-        return self.node_list[index - 1]  # Convert 1-based to 0-based indexing
+        return self.nodes[index - 1]  # Convert 1-based to 0-based indexing
     
-    def connectivity(self, N):  # Fixed syntax and parameters
+    def create_elements(self, N):  # Fixed syntax and parameters
         n = int(math.sqrt(N))
         # Create elements with proper connectivity
         for j in range(n-1):
@@ -61,12 +56,11 @@ class Mesh:
                 node3 = self.get_node((j + 1) * n + i + 1) 
                 node4 = self.get_node((j + 1) * n + i + 2)
                 # Create two triangular elements
-                self.elements.append([node1, node2, node3])  # Lower triangle
-                self.elements.append([node2, node4, node3])  # Upper triangle
-        print(self.elements)
-        return self.elements
+                self.elements.append(Triangle(j*n+i+1, node1, node2, node3))  # Lower triangle
+                self.elements.append(Triangle(j*n+i+1, node2, node4, node3))  # Upper triangle
+
     
-    def boundary_conditioned(self):
+    def boundary_conditiones(self):
         # Define Dirichlet and Neumann boundary conditions
         dirichlet_nodes = (self.node_list[i] for i in range(1, 11)) 
         # Neumann BCs (N91 to N100)
