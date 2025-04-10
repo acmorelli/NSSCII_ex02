@@ -19,7 +19,8 @@ k= 1 # TODO input file
 h = 1 # TODO input file -- h is the element thickness
 
 class Node:
-    def __init__(self, x, y):
+    def __init__(self, id, x, y):
+        self.id = id
         self.x = x
         self.y = y
 
