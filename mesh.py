@@ -5,38 +5,69 @@ from matplotlib.tri import Triangulation
 from min_FEM import *
 
 class Mesh:
-    def __init__(self, N):
+    def __init__(self, N, Variation, L):
         self.N = N
         self.nodes = []  # Initialize node list
         self.elements = []
-
+        self.Variation = Variation
         self.create_nodes(N)
         self.create_elements(N)
+        self.L=L
 
         
         self.neumann_nodes, self.dirichlet_nodes, self.neumann_nodes_inside = self.boundary_conditiones()
     
     
     def coordinates(self):
-        L = 1.0  # Length of the domain
         # Create a grid of points
-        x = np.linspace(0, L, int(math.sqrt(self.N)))
-        y = np.linspace(0, L, int(math.sqrt(self.N)))
+        x = np.linspace(0, self.L, int(math.sqrt(self.N)))
+        y = np.linspace(0, self.L, int(math.sqrt(self.N)))
         X, Y = np.meshgrid(x, y)
         return X.flatten(), Y.flatten()
-    
-    def transform():
-        return None
+ 
+        
     
     def create_nodes(self, N):
+        self.Variation
         # self.node_list = []
+        x_bias=[] 
         n = int(math.sqrt(N))
         # Create nodes with correct numbering
-        x_coords, y_coords = self.coordinates()
+        x_coords, y_coords = self.transform(self.Variation)
         for i in range(N):
             x = x_coords[i]
             y = y_coords[i]
-            self.nodes.append(Node(i+1, x, y))
+            print("x", x)
+            print("y", y)
+            if  self.Variation == 'V1':
+                if i == 9:
+                    # Apply transformation for V1
+                    x1 = self.L/2
+                    y1 = 0
+                    self.nodes.append(Node(i+1, x1, y1))
+                else:
+                    self.nodes.append(Node(i+1, x, y))
+                # Apply transformation for V1   
+            elif self.Variation == 'V2':
+                # Define the bias factor B
+                B = (1 / (2 * self.L)) * (self.L - y_coords[i])
+                # Apply the bias to the x-coordinates
+                x_bias[i] = x_coords[i] * ((B / self.L) * x_coords[i] - B + 1)
+                self.nodes.append(Node(i+1, x_bias[i], y_coords))
+
+            elif self.Variation == 'V3':
+                r_min=0.5*self.L
+                r_max=0.*5*self.L
+                theta_min,theta_max=0,np.pi/4
+                
+
+
+                self.nodes.append(Node(i+1,r,theta))
+            
+           
+            else:
+                #Regular Mesh   
+                self.nodes.append(Node(i+1, x, y))
 
     
     def get_node(self, index):
