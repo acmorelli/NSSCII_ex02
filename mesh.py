@@ -92,10 +92,11 @@ class Mesh:
 
     
     def boundary_conditiones(self):
+        n = int(math.sqrt(self.N))
         # Define Dirichlet and Neumann boundary conditions
-        dirichlet_nodes = [self.nodes[i] for i in range(0, 10)]  # nodes 1-10 
-        neumann_nodes = [self.nodes[i] for i in range(90, 100)]  # nodes 91-100
-        neumann_nodes_inside = [self.nodes[i] for i in range(10, 90)]  # nodes 11-90
+        dirichlet_nodes = [self.nodes[i] for i in range(n)]  # nodes 1-10 
+        neumann_nodes = [self.nodes[i] for i in range(self.N-n,self.N)]  # nodes 91-100
+        neumann_nodes_inside = [self.nodes[i] for i in range(n,self.N-n)]  # nodes 11-90
         return neumann_nodes, dirichlet_nodes, neumann_nodes_inside
     
     def plot_mesh(self):
@@ -123,8 +124,7 @@ class Mesh:
         plt.show()
            
 # Create mesh object - this is all we need
-ob = Mesh(100, 'V3' ,10)
-ob.plot_mesh()
+
 
 
 
