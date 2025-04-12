@@ -10,11 +10,9 @@ class Mesh:
         self.nodes = []  # Initialize node list
         self.elements = []
         self.Variation = Variation
-        self.create_nodes(N)
+        self.L = L
+        self.create_nodes(N, Variation, L)  # Pass all required parameters
         self.create_elements(N)
-        self.L=L
-
-        
         self.neumann_nodes, self.dirichlet_nodes, self.neumann_nodes_inside = self.boundary_conditiones()
     
     
@@ -27,42 +25,45 @@ class Mesh:
  
         
     
-    def create_nodes(self, N):
-        self.Variation
-        # self.node_list = []
-        x_bias=[] 
+    def create_nodes(self, N, Variation, L):  # Match parameters with actual usage
+        x_bias = []  # Initialize x_bias list
         n = int(math.sqrt(N))
         # Create nodes with correct numbering
-        x_coords, y_coords = self.transform(self.Variation)
+        x_coords, y_coords = self.coordinates()
         for i in range(N):
             x = x_coords[i]
             y = y_coords[i]
-            print("x", x)
-            print("y", y)
-            if  self.Variation == 'V1':
+            # print("x", x)
+            # print("y", y)
+            if Variation == 'V1':
                 if i == 9:
                     # Apply transformation for V1
-                    x1 = self.L/2
+                    x1 = L/2
                     y1 = 0
                     self.nodes.append(Node(i+1, x1, y1))
                 else:
                     self.nodes.append(Node(i+1, x, y))
                 # Apply transformation for V1   
-            elif self.Variation == 'V2':
+            elif Variation == 'V2':
                 # Define the bias factor B
-                B = (1 / (2 * self.L)) * (self.L - y_coords[i])
+                B = (1 / (2 * L)) * (L - y)
                 # Apply the bias to the x-coordinates
-                x_bias[i] = x_coords[i] * ((B / self.L) * x_coords[i] - B + 1)
-                self.nodes.append(Node(i+1, x_bias[i], y_coords))
+                x_bias.append(x * ((B / L) * x - B + 1))
+                self.nodes.append(Node(i+1, x_bias[i], y))
 
-            elif self.Variation == 'V3':
-                r_min=0.5*self.L
-                r_max=0.*5*self.L
+            elif Variation == 'V3':
+                # Apply transformation for V3
+                r_min=L
+                r_max=2*L
                 theta_min,theta_max=0,np.pi/4
-                
+                r= r_min + x + (r_max-r_min)
+                theta=theta_min + y * (theta_max-theta_min)
 
+                X_p = r * np.cos(theta)
+                Y_p = r * np.sin(theta)
 
-                self.nodes.append(Node(i+1,r,theta))
+                self.nodes.append(Node(i+1,X_p,Y_p))
+                #This code is not creating the mesh as expected
             
            
             else:
@@ -85,33 +86,46 @@ class Mesh:
                 # Create two triangular elements
                 self.elements.append(Triangle(j*n+i+1, node1, node2, node3))  # Lower triangle
                 self.elements.append(Triangle(j*n+i+1, node2, node4, node3))  # Upper triangle
+                #print("Node1: ", node1.x, node1.y)
+        print("elements:",self.elements[0].n1.x,self.elements[0].n1.y)
+        print("elements:",self.elements[0].n2.x,self.elements[0].n2.y)
+        print("elements:",self.elements[0].n3.x,self.elements[0].n3.y)
 
     
     def boundary_conditiones(self):
         # Define Dirichlet and Neumann boundary conditions
-        dirichlet_nodes = (self.node_list[i] for i in range(1, 11)) 
-        # Neumann BCs (N91 to N100)
-        neumann_nodes= (self.node_list[i] for i in range(91, 101))
-        neumann_nodes_inside= (self.node_list[i] for i in range(11, 91))
-        return dirichlet_nodes, neumann_nodes, neumann_nodes_inside
+        dirichlet_nodes = [self.nodes[i] for i in range(0, 10)]  # nodes 1-10 
+        neumann_nodes = [self.nodes[i] for i in range(90, 100)]  # nodes 91-100
+        neumann_nodes_inside = [self.nodes[i] for i in range(10, 90)]  # nodes 11-90
+        return neumann_nodes, dirichlet_nodes, neumann_nodes_inside
     
     def plot_mesh(self):
-        # Get coordinates
-        x, y = self.coordinates()
-
+        # Extract all node coordinates
+        x_coords = np.array([node.x for node in self.nodes])
+        y_coords = np.array([node.y for node in self.nodes])
+        
+        # Create triangulation connectivity list
+        triangles = np.array([[self.nodes.index(elem.n1),
+                             self.nodes.index(elem.n2),
+                             self.nodes.index(elem.n3)] 
+                            for elem in self.elements])
+        
         # Create triangulation
-        triang = Triangulation(x, y, self.elements)
+        triang = Triangulation(x_coords, y_coords, triangles)
 
         # Plot the mesh
         plt.figure(figsize=(8, 8))
         plt.triplot(triang, color='gray', alpha=0.5)
-        plt.scatter(x, y, color='red')
+        plt.scatter(x_coords, y_coords, color='red', s=20)
         plt.title('Mesh Plot')
         plt.xlabel('X-axis')
         plt.ylabel('Y-axis')
+        plt.axis('equal')
         plt.show()
-
            
+# Create mesh object - this is all we need
+ob = Mesh(100, 'V2' ,10)
+ob.plot_mesh()
 
 
 
