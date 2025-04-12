@@ -60,23 +60,11 @@ class Mesh:
 
             elif Variation == 'V3':
                 # Apply transformation for V3
-                
-
-                #Transformation is wrong, what should I do is creating a 
-                #new coordinate meshing without tranform cartesian coordinates to polar coordinates.
-                x_center = 2*L
-                y_center = 0
-
-                
-
-
                 X_p = r * np.cos(theta) + 2*L
                 Y_p = r * np.sin(theta)
 
                 self.nodes.append(Node(i+1,X_p,Y_p))
-                #This code is not creating the mesh as expected
-            
-           
+               
             else:
                 #Regular Mesh   
                 self.nodes.append(Node(i+1, x, y))
