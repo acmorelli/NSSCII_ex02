@@ -28,9 +28,16 @@ class Mesh:
     def create_nodes(self, N, Variation, L):  # Match parameters with actual usage
         x_bias = []  # Initialize x_bias list
         n = int(math.sqrt(N))
+        r1 = np.linspace(L, 2*L, int(math.sqrt(self.N)))
+        theta1 = np.linspace(np.pi,5*np.pi/4 , int(math.sqrt(self.N)))
+        R, Theta = np.meshgrid(r1, theta1)
+        R = R.flatten()
+        Theta = Theta.flatten()
         # Create nodes with correct numbering
         x_coords, y_coords = self.coordinates()
         for i in range(N):
+            r=R[i]
+            theta=Theta[i]
             x = x_coords[i]
             y = y_coords[i]
             # print("x", x)
@@ -53,13 +60,17 @@ class Mesh:
 
             elif Variation == 'V3':
                 # Apply transformation for V3
-                r_min=L
-                r_max=2*L
-                theta_min,theta_max=0,np.pi/4
-                r= r_min + x + (r_max-r_min)
-                theta=theta_min + y * (theta_max-theta_min)
+                
 
-                X_p = r * np.cos(theta)
+                #Transformation is wrong, what should I do is creating a 
+                #new coordinate meshing without tranform cartesian coordinates to polar coordinates.
+                x_center = 2*L
+                y_center = 0
+
+                
+
+
+                X_p = r * np.cos(theta) + 2*L
                 Y_p = r * np.sin(theta)
 
                 self.nodes.append(Node(i+1,X_p,Y_p))
@@ -124,7 +135,7 @@ class Mesh:
         plt.show()
            
 # Create mesh object - this is all we need
-ob = Mesh(100, 'V2' ,10)
+ob = Mesh(100, 'V3' ,10)
 ob.plot_mesh()
 
 
