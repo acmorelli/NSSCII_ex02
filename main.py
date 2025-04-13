@@ -16,10 +16,10 @@ def main():
 
     if testing:
         # Create 2 by 2 mesh
-        N = 4
+        N = 9
         L = 1
-        mesh = Mesh(N,'V3', L)
-        mesh.plot_mesh()
+        mesh = Mesh(N,'V0', L)
+        # mesh.plot_mesh()
         for node in mesh.nodes:
             print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
         for element in mesh.elements:
@@ -60,12 +60,24 @@ def main():
     print("H:", H)
     H_free = compute_free_nodes(H, mesh)
     print("H_free:", H_free)
-    rhs = compute_rhs(H, mesh, T_dirichlet)
+    f = compute_load_vector(H, mesh, q)
+    print("f:", f)
+    rhs = compute_rhs(H, mesh, f, T_dirichlet)
     print("rhs:", rhs)
     # solve the system of equations
     T_free = np.linalg.solve(H_free, rhs)
-    print("T_free:", T_free)
-    reaction_forces = compute_reaction_forces(H, mesh, T_free)
+
+    # set up complete solution vector
+    T = np.zeros(len(mesh.nodes)) 
+    free_nodes = np.concatenate([mesh.neumann_nodes_inside, mesh.neumann_nodes])
+    for i, node in enumerate(free_nodes):
+        T[node.id - 1] = T_free[i]
+    for node in mesh.dirichlet_nodes:
+        T[node.id - 1] = T_dirichlet
+    print("T:", T)
+
+
+    reaction_forces = compute_reaction_forces(H, mesh, T)
     print("Reaction forces:", reaction_forces)
     # post processing
         
