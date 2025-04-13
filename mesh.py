@@ -127,12 +127,5 @@ class Mesh:
         plt.axis('equal')
         plt.show()
            
-# Create mesh object - this is all we need
-ob = Mesh(100, None, 1)
-for i in range(len(ob.elements)):
-    print("Elements id: ",ob.elements[i].id)
-    print("Nodes n1, n2, n3:",ob.elements[i].n1.id, ob.elements[i].n2.id, ob.elements[i].n3.id)
- 
 
-ob.plot_mesh()
 
