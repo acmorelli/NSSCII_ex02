@@ -37,12 +37,17 @@ class Triangle: # element class
         x2, y2 = self.n2.x, self.n2.y
         x3, y3 = self.n3.x, self.n3.y
         return 0.5 * abs(x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2))
+    def a(self, i, j):
+        return i.x*j.y -j.x*i.y
     def b(self, i, j):
         """X coord diff between each node of the triangle"""
         return i.y - j.y
     def c(self, i, j):
         """Y coord diff between each node of the triangle"""
         return i.x - j.x
+    def area_coeffs(self):
+        """Area coefficients for the triangle"""
+        return [self.a(self.n2, self.n3), self.a(self.n3, self.n1), self.a(self.n1, self.n2)]
     def b_coeffs(self): 
         """b coefficients for the triangle"""
         return [self.b(self.n2, self.n3), self.b(self.n3, self.n1), self.b(self.n1, self.n2)]
