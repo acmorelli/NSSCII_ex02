@@ -45,7 +45,7 @@ class Triangle: # element class
     def c(self, i, j):
         """Y coord diff between each node of the triangle"""
         return i.x - j.x
-    def area_coeffs(self):
+    def a_coeffs(self):
         """Area coefficients for the triangle"""
         return [self.a(self.n2, self.n3), self.a(self.n3, self.n1), self.a(self.n1, self.n2)]
     def b_coeffs(self): 
