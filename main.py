@@ -1,5 +1,5 @@
 # import local files here
-from functions import compute_local_stiffness_matrix
+from functions import *
 from mesh import Mesh
 import numpy as np
 
@@ -7,21 +7,34 @@ testing = True
 
 def main():
     
-    k = 0.1  # Example conductivity coefficient
+    k = 1  # Example conductivity coefficient
     N = 100 # Number of nodes in the mesh (4x4 grid)
+    T_dirichlet = 1  # Dirichlet boundary condition value
+    q = 1  # Flux across the Neumann boundary
 
     assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
 
     if testing:
         # Create 2 by 2 mesh
-        N = 4
+        N = 9
         L=1
         mesh = Mesh(N,'V1', L)
-        mesh.plot_mesh()
+        # mesh.plot_mesh()
         for node in mesh.nodes:
             print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
         for element in mesh.elements:
             print(f"Element: {element.id}, Nodes: ({element.n1.id}, {element.n2.id}, {element.n3.id})")
+        print("Dirichlet nodes:")
+        for node in mesh.dirichlet_nodes:
+            print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
+        print("Neumann nodes:")
+        for node in mesh.neumann_nodes:
+            print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
+        print("Neumann nodes inside:")
+        for node in mesh.neumann_nodes_inside:
+            print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
+
+        print("\n")
 
     else:
         # create real mesh
@@ -43,11 +56,18 @@ def main():
                 global_col_idx = element_nodes_ids[col_e] - 1
                 H[global_row_idx][global_col_idx] += H_e[row_e][col_e]
 
-        # take into account the Dirichlet boundary conditions
-
-        # solve the system of equations
-
-        # post processing
+    # take into account the Dirichlet boundary conditions
+    print("H:", H)
+    H_free = compute_free_nodes(H, mesh)
+    print("H_free:", H_free)
+    rhs = compute_rhs(H, mesh, T_dirichlet)
+    print("rhs:", rhs)
+    # solve the system of equations
+    T_free = np.linalg.solve(H_free, rhs)
+    print("T_free:", T_free)
+    reaction_forces = compute_reaction_forces(H, mesh, T_free)
+    print("Reaction forces:", reaction_forces)
+    # post processing
         
                 
 
