@@ -28,11 +28,14 @@ class Mesh:
     def create_nodes(self, N, Variation, L):  # Match parameters with actual usage
         x_bias = []  # Initialize x_bias list
         n = int(math.sqrt(N))
+
+        #Creating grid of points for V3 variation
         r1 = np.linspace(L, 2*L, int(math.sqrt(self.N)))
         theta1 = np.linspace(np.pi,5*np.pi/4 , int(math.sqrt(self.N)))
         R, Theta = np.meshgrid(r1, theta1)
         R = R.flatten()
         Theta = Theta.flatten()
+
         # Create nodes with correct numbering
         x_coords, y_coords = self.coordinates()
         for i in range(N):
@@ -82,13 +85,14 @@ class Mesh:
                 node2 = self.get_node(j * n + i + 2)
                 node3 = self.get_node((j + 1) * n + i + 1) 
                 node4 = self.get_node((j + 1) * n + i + 2)
+                
                 # Create two triangular elements
-                self.elements.append(Triangle(j*n+i+1, node1, node2, node3))  # Lower triangle
-                self.elements.append(Triangle(j*n+i+1, node2, node4, node3))  # Upper triangle
+                self.elements.append(Triangle((j*(n-1)+i)*2+1, node1, node2, node3))  # Lower triangle
+                self.elements.append(Triangle((j*(n-1)+i)*2+2, node2, node4, node3))  # Upper triangle
                 #print("Node1: ", node1.x, node1.y)
-        print("elements:",self.elements[0].n1.x,self.elements[0].n1.y)
-        print("elements:",self.elements[0].n2.x,self.elements[0].n2.y)
-        print("elements:",self.elements[0].n3.x,self.elements[0].n3.y)
+        # print("elements:",self.elements[0].n1.x,self.elements[0].n1.y)
+        # print("elements:",self.elements[0].n2.x,self.elements[0].n2.y)
+        # print("elements:",self.elements[0].n3.x,self.elements[0].n3.y)
 
     
     def boundary_conditiones(self):
@@ -123,8 +127,5 @@ class Mesh:
         plt.axis('equal')
         plt.show()
            
-# Create mesh object - this is all we need
-
-
 
 

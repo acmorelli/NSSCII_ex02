@@ -16,10 +16,10 @@ def main():
 
     if testing:
         # Create 2 by 2 mesh
-        N = 9
-        L=1
-        mesh = Mesh(N,'V1', L)
-        # mesh.plot_mesh()
+        N = 4
+        L = 1
+        mesh = Mesh(N,'V3', L)
+        mesh.plot_mesh()
         for node in mesh.nodes:
             print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
         for element in mesh.elements:
