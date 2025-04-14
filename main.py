@@ -1,5 +1,5 @@
 # import local files here
-from functions import compute_local_stiffness_matrix
+from functions import *
 from mesh import Mesh
 import numpy as np
 
@@ -7,21 +7,35 @@ testing = True
 
 def main():
     
-    k = 0.1  # Example conductivity coefficient
+    k = 1  # Example conductivity coefficient
     N = 100 # Number of nodes in the mesh (4x4 grid)
+    T_dirichlet = 1  # Dirichlet boundary condition value
+    q = 1  # Flux across the Neumann boundary
+    Variation=  'V4b'
 
     assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
 
     if testing:
         # Create 2 by 2 mesh
-        N = 4
+        N = 100
         L = 1
-        mesh = Mesh(N,'V3', L)
-        mesh.plot_mesh()
+        mesh = Mesh(N,'V0', L)
+        # mesh.plot_mesh()
         for node in mesh.nodes:
             print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
         for element in mesh.elements:
             print(f"Element: {element.id}, Nodes: ({element.n1.id}, {element.n2.id}, {element.n3.id})")
+        print("Dirichlet nodes:")
+        for node in mesh.dirichlet_nodes:
+            print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
+        print("Neumann nodes:")
+        for node in mesh.neumann_nodes:
+            print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
+        print("Neumann nodes inside:")
+        for node in mesh.neumann_nodes_inside:
+            print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
+
+        print("\n")
 
     else:
         # create real mesh
@@ -33,7 +47,7 @@ def main():
     for element_id in range(1, len(mesh.elements) + 1):
 
         # Compute local stiffness matrix for each element
-        H_e = compute_local_stiffness_matrix(k, element_id, mesh)
+        H_e = compute_local_stiffness_matrix(k, element_id, mesh, Variation)
         
         # Assemble global stiffness matrix
         element_nodes_ids = [mesh.elements[element_id-1].n1.id, mesh.elements[element_id-1].n2.id, mesh.elements[element_id-1].n3.id]
@@ -43,11 +57,30 @@ def main():
                 global_col_idx = element_nodes_ids[col_e] - 1
                 H[global_row_idx][global_col_idx] += H_e[row_e][col_e]
 
-        # take into account the Dirichlet boundary conditions
+    # take into account the Dirichlet boundary conditions
+    print("H:", H)
+    H_free = compute_free_nodes(H, mesh)
+    print("H_free:", H_free)
+    f = compute_load_vector(H, mesh, q)
+    print("f:", f)
+    rhs = compute_rhs(H, mesh, f, T_dirichlet)
+    print("rhs:", rhs)
+    # solve the system of equations
+    T_free = np.linalg.solve(H_free, rhs)
 
-        # solve the system of equations
+    # set up complete solution vector
+    T = np.zeros(len(mesh.nodes)) 
+    free_nodes = np.concatenate([mesh.neumann_nodes_inside, mesh.neumann_nodes])
+    for i, node in enumerate(free_nodes):
+        T[node.id - 1] = T_free[i]
+    for node in mesh.dirichlet_nodes:
+        T[node.id - 1] = T_dirichlet
+    print("T:", T)
 
-        # post processing
+
+    reaction_forces = compute_reaction_forces(H, mesh, T)
+    print("Reaction forces:", reaction_forces)
+    # post processing
         
                 
 
