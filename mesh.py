@@ -46,14 +46,10 @@ class Mesh:
             # print("x", x)
             # print("y", y)
             if Variation == 'V1':
-                if i == 9:
-                    # Apply transformation for V1
-                    x1 = L/2
-                    y1 = 0
-                    self.nodes.append(Node(i+1, x1, y1))
-                else:
-                    self.nodes.append(Node(i+1, x, y))
                 # Apply transformation for V1   
+                x =  (1+y) * x/2
+                self.nodes.append(Node(i+1, x, y))
+                
             elif Variation == 'V2':
                 # Define the bias factor B
                 B = (1 / (2 * L)) * (L - y)
