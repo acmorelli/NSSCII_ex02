@@ -11,12 +11,13 @@ def main():
     N = 100 # Number of nodes in the mesh (4x4 grid)
     T_dirichlet = 1  # Dirichlet boundary condition value
     q = 1  # Flux across the Neumann boundary
+    Variation=  'V4b'
 
     assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
 
     if testing:
         # Create 2 by 2 mesh
-        N = 9
+        N = 100
         L = 1
         mesh = Mesh(N,'V0', L)
         # mesh.plot_mesh()
@@ -46,7 +47,7 @@ def main():
     for element_id in range(1, len(mesh.elements) + 1):
 
         # Compute local stiffness matrix for each element
-        H_e = compute_local_stiffness_matrix(k, element_id, mesh)
+        H_e = compute_local_stiffness_matrix(k, element_id, mesh, Variation)
         
         # Assemble global stiffness matrix
         element_nodes_ids = [mesh.elements[element_id-1].n1.id, mesh.elements[element_id-1].n2.id, mesh.elements[element_id-1].n3.id]

@@ -2,12 +2,19 @@ from min_FEM import *
 import numpy as np
 import scipy.integrate
 
-def compute_local_stiffness_matrix(k, element_id, mesh):
+def compute_local_stiffness_matrix(k,element_id, mesh, Variation=None):
+    
     # k: heat conductivity coefficient
     # tri_id: id of the triangle in the mesh
     # mesh: mesh object
-
+    id1=np.arange(62,71)
+    id2=np.arange(83,87)
+    id3=np.arange(98,104)
+    id4=np.arange(111,123)
+    id_c=np.concatenate((id1,id2,id3,id4))
+    ce=10
     H_e = np.zeros((3, 3)) # local stiffness matrix
+
 
     # get element
     element = mesh.elements[element_id-1]
@@ -16,6 +23,18 @@ def compute_local_stiffness_matrix(k, element_id, mesh):
     c = np.array(element.c_coeffs())
     # Area of the triangle
     A = element.area()
+    if Variation == 'V4a':
+        if element.id in id_c:
+            k=ce*k
+        else:
+            pass
+    elif Variation == 'V4b':
+        if element.id in id_c:
+            k=k/ce
+        else:
+            pass
+    else:
+        pass
     # see Zienkewicz, page 120 and 125
     for i in range(3):
         for j in range(3):
