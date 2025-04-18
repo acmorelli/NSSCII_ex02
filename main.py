@@ -1,3 +1,12 @@
+""" observations version 1 - squared mesh:
+• The temperature gradient must be constant in the entire model and equal to the overall
+gradient ΔT/Δy.
+• The flux must be constant in the entire model and must be equal to the applied flux. The
+latter must be equal to the sum of the applied nodal “forces” divided by the corresponding
+area.
+• The temperature gradient and the flux, together with eqn. (2) must yield the input for
+the conductivity k.
+"""
 # import local files here
 from functions import *
 from mesh import Mesh
@@ -81,12 +90,6 @@ def main():
     reaction_forces = compute_reaction_forces(H, mesh, T)
     print("Reaction forces:", reaction_forces)
     # post processing
-        
-                
-
-    
-    
-
 
 
 if __name__ == "__main__":

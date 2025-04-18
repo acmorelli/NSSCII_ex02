@@ -3,7 +3,7 @@ import numpy as np
 import scipy.integrate
 
 def compute_local_stiffness_matrix(k,element_id, mesh, Variation=None):
-    
+
     # k: heat conductivity coefficient
     # tri_id: id of the triangle in the mesh
     # mesh: mesh object
@@ -127,4 +127,28 @@ def compute_reaction_forces(H, mesh, T):
 
     dirichlet_nodes = mesh.dirichlet_nodes
     return P[[node.id-1 for node in dirichlet_nodes]]# reaction forces at Dirichlet nodes
+
+def compute_temperature_gradient():
+    """page 124
+    values related to the geometrical center of the element"""
     
+    pass
+def compute_heat_flux():
+    pass
+def plot_temperature_field():
+    """Plot the temperature field T(x, y) as contour plot, with the nodal temperatures as primary
+values and (bi-linear) interpolation between the nodes"""
+    pass
+
+def plot_temperature_gradients_and_fluxes():
+    """Plot the temperature gradients and fluxes at the element centroids as vector plots 
+    (and, optionally,their components as contour plots without interpolation, i.e. constant 
+    for each element)."""
+
+    pass
+
+def compare_fluxes():
+"""Compare the fluxes in elements attached to the boundary y = L to the applied Neumann
+BC values (applied via nodal forces P91..100)."""
+    pass
+
