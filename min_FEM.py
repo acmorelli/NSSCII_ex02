@@ -21,7 +21,8 @@ k= 1 # TODO input file
 h = 1 # TODO input file -- h is the element thickness
 
 class Node:
-    def __init__(self, x, y):
+    def __init__(self, id, x, y):
+        self.id = id
         self.x = x
         self.y = y
 class Triangle: # element class
@@ -37,21 +38,25 @@ class Triangle: # element class
         x2, y2 = self.n2.x, self.n2.y
         x3, y3 = self.n3.x, self.n3.y
         return 0.5 * abs(x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2))
+    def a(self, i, j):
+        return i.x*j.y -j.x*i.y
     def b(self, i, j):
         """X coord diff between each node of the triangle"""
-        return i.x - j.x
+        return i.y - j.y
     def c(self, i, j):
         """Y coord diff between each node of the triangle"""
-        return i.y - j.y
+        return i.x - j.x
+    def a_coeffs(self):
+        """Area coefficients for the triangle"""
+        return [self.a(self.n2, self.n3), self.a(self.n3, self.n1), self.a(self.n1, self.n2)]
     def b_coeffs(self): 
         """b coefficients for the triangle"""
-        return [self.b(self.n1, self.n2), self.b(self.n2, self.n3), self.b(self.n3, self.n1)]
+        return [self.b(self.n2, self.n3), self.b(self.n3, self.n1), self.b(self.n1, self.n2)]
     def c_coeffs(self): 
         """c coefficients for the triangle"""
-        return [self.c(self.n1, self.n2), self.c(self.n2, self.n3), self.c(self.n3, self.n1)]
-    def local_stiffness_matrix(self):
-        # k is element dependent
-        k_local= np.zeros((3, 3))
+        return [self.c(self.n3, self.n2), self.c(self.n1, self.n3), self.c(self.n2, self.n1)]
+    def local_stiffness_matrix(self): #CHECK
+        # k is element dependent 
         A = self.area()
         k = self.k
         h = self.h
