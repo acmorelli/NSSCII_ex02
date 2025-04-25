@@ -11,13 +11,15 @@ the conductivity k.
 from functions import *
 from mesh import Mesh
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 testing = True
 
 def main():
     
     k = 1  # Example conductivity coefficient
-    N = 100 # Number of nodes in the mesh (4x4 grid)
+    N = 100 # Number of nodes in the mesh 
     T_dirichlet = 1  # Dirichlet boundary condition value
     q = 1  # Flux across the Neumann boundary
     Variation=  'V4b'
@@ -89,7 +91,16 @@ def main():
 
     reaction_forces = compute_reaction_forces(H, mesh, T)
     print("Reaction forces:", reaction_forces)
+
     # post processing
+    # TODO: check units
+    # TODO: adjust contour plots with fixed colors/ scales
+    temperature_gradient(mesh, T)
+    plot_temperature_field(mesh, T)
+    plot_temperature_gradient(mesh)
+    compute_heat_flux(mesh, k)
+    plot_heat_flux(mesh)
+    
 
 
 if __name__ == "__main__":

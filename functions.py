@@ -1,6 +1,9 @@
 from min_FEM import *
 import numpy as np
 import scipy.integrate
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.tri as tri
 
 def compute_local_stiffness_matrix(k,element_id, mesh, Variation=None):
 
@@ -128,17 +131,169 @@ def compute_reaction_forces(H, mesh, T):
     dirichlet_nodes = mesh.dirichlet_nodes
     return P[[node.id-1 for node in dirichlet_nodes]]# reaction forces at Dirichlet nodes
 
-def compute_temperature_gradient():
+def temperature_gradient(mesh, T_global):
     """page 124
-    values related to the geometrical center of the element"""
-    
-    pass
-def compute_heat_flux():
-    pass
-def plot_temperature_field():
+    values related to the geometrical center of the element
+
+    temp gradient is constant in the element
+
+    Parameters:
+    - mesh object, contains elements and nodes coordinates
+    - T: solved global temperature vector
+
+    Returns:
+    - grad_T: numpy array [∂T/∂x, ∂T/∂y]
+
+    logic draft:
+    loop over elements in the mesh
+    obtain the local node ids
+    get local nodal temperatures from t_global
+    get b and c coeffs, and area
+    build the matrixes and solve the system
+    """
+
+    for element in mesh.elements:
+        node_ids = element.node_ids()          
+        T_local = T_global[node_ids] # shape (3,)
+
+        b = element.b_coeffs() # -> list
+        c = element.c_coeffs() # -> list
+        A = element.area()
+
+        BC_matrix = np.array([b, c]) # shape: (2, 3)
+        grad_T = (1 / (2 * A)) * BC_matrix @ T_local # shape: (2,)
+
+        element.gradient = grad_T
+
+
+def compute_heat_flux(mesh, k):
+    """ q = -k * grad(T) at the element centroids
+    k thermal conductivity constant across the element"""
+    for element in mesh.elements:
+        grad_T = element.gradient
+        element.flux = -k * grad_T
+
+def plot_temperature_field(mesh, T):
     """Plot the temperature field T(x, y) as contour plot, with the nodal temperatures as primary
 values and (bi-linear) interpolation between the nodes"""
-    pass
+
+    # to plot triangled mesh, get the x and y nodes and the triangles
+    node_x = np.array([node.x for node in mesh.nodes])
+    node_y = np.array([node.y for node in mesh.nodes])
+    triangles = np.array([
+        element.node_ids() for element in mesh.elements
+    ])
+
+    triangulation = tri.Triangulation(node_x, node_y, triangles)
+
+    plt.figure(figsize=(8, 6))
+    contour = plt.tricontourf(triangulation, T, levels=50, cmap='plasma')
+    plt.colorbar(contour, label="Temperature")
+    plt.title("Temperature Field $T(x, y)$")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.axis('equal')
+    plt.grid(True)
+    plt.show()
+
+def plot_temperature_gradient(mesh):
+
+    centroids_x = np.array([element.centroidX for element in mesh.elements])
+    centroids_y = np.array([element.centroidY for element in mesh.elements])
+    grad_x = np.array([element.gradient[0]for element in mesh.elements])
+    grad_y = np.array([element.gradient[1]for element in mesh.elements])
+
+    # to plot triangled mesh, get the x and y nodes and the triangles
+    node_x = np.array([node.x for node in mesh.nodes])
+    node_y = np.array([node.y for node in mesh.nodes])
+    triangles = np.array([
+        element.node_ids() for element in mesh.elements
+    ])
+
+    # Plot vector field
+    plt.figure(figsize=(8, 6))
+    plt.quiver(centroids_x, centroids_y, grad_x, grad_y, angles='xy', scale_units='xy', scale=50, color='blue')
+    plt.title("Temperature Gradient Vectors at Element Centroids")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.axis("equal")
+    plt.grid(True)
+    plt.show()
+
+    # extra contour for each component of the temp gradient
+    triangulation = tri.Triangulation(node_x, node_y, triangles)
+
+    # ∂T/∂x
+    plt.figure(figsize=(8, 6))
+    tpc = plt.tripcolor(triangulation, facecolors=grad_x, edgecolors='k', shading='flat', cmap='coolwarm')
+    plt.colorbar(tpc, label="$\\partial T/\\partial x$")
+    plt.title("Constant ∂T/∂x Per Element")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.axis('equal')
+    plt.grid(False)
+    plt.show()
+
+    # ∂T/∂y
+    plt.figure(figsize=(8, 6))
+    tpc = plt.tripcolor(triangulation, facecolors=grad_y, edgecolors='k', shading='flat', cmap='coolwarm')
+    plt.colorbar(tpc, label="$\\partial T/\\partial y$")
+    plt.title("Constant ∂T/∂y Per Element")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.axis('equal')
+    plt.grid(True)
+    plt.show()
+
+
+def plot_heat_flux(mesh):
+
+    centroids_x = np.array([element.centroidX for element in mesh.elements])
+    centroids_y = np.array([element.centroidY for element in mesh.elements])
+    flux_x = np.array([element.flux[0]for element in mesh.elements])
+    flux_y = np.array([element.flux[1]for element in mesh.elements])
+
+    # to plot triangled mesh, get the x and y nodes and the triangles
+    node_x = np.array([node.x for node in mesh.nodes])
+    node_y = np.array([node.y for node in mesh.nodes])
+    triangles = np.array([
+        element.node_ids() for element in mesh.elements
+    ])
+
+    # Plot vector field
+    plt.figure(figsize=(8, 6))
+    plt.quiver(centroids_x, centroids_y, flux_x, flux_y, angles='xy', scale_units='xy', scale=50, color='blue')
+    plt.title("Heat Flux Vectors at Element Centroids")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.axis("equal")
+    plt.grid(True)
+    plt.show()
+
+    # extra contour for each component of the heat flux
+    triangulation = tri.Triangulation(node_x, node_y, triangles)
+
+    # in x
+    plt.figure(figsize=(8, 6))
+    tpc = plt.tripcolor(triangulation, facecolors=flux_x, edgecolors='k', shading='flat', cmap='coolwarm')
+    plt.colorbar(tpc, label="q in x direction")
+    plt.title("Heat flux in x Per Element")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.axis('equal')
+    plt.grid(False)
+    plt.show()
+
+    # in y
+    plt.figure(figsize=(8, 6))
+    tpc = plt.tripcolor(triangulation, facecolors=flux_y, edgecolors='k', shading='flat', cmap='coolwarm')
+    plt.colorbar(tpc, label="q in y direction")
+    plt.title("Heat flux in y Per Element")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.axis('equal')
+    plt.grid(True)
+    plt.show()
 
 def plot_temperature_gradients_and_fluxes():
     """Plot the temperature gradients and fluxes at the element centroids as vector plots 
@@ -148,7 +303,7 @@ def plot_temperature_gradients_and_fluxes():
     pass
 
 def compare_fluxes():
-"""Compare the fluxes in elements attached to the boundary y = L to the applied Neumann
+    """Compare the fluxes in elements attached to the boundary y = L to the applied Neumann
 BC values (applied via nodal forces P91..100)."""
     pass
 

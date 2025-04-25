@@ -22,7 +22,7 @@ h = 1 # TODO input file -- h is the element thickness
 
 class Node:
     def __init__(self, id, x, y):
-        self.id = id
+        self.id = id # global
         self.x = x
         self.y = y
 class Triangle: # element class
@@ -33,6 +33,13 @@ class Triangle: # element class
         self.n3 = n3
         self.k = k #TODO input file
         self.h = h #TODO input file
+        self.centroidX = (n1.x + n2.x + n3.x)/3
+        self.centroidY = (n1.y + n2.y + n3.y)/3
+        self.gradient = None
+        self.flux = None
+
+    def node_ids(self):
+        return np.array([self.n1.id - 1, self.n2.id - 1, self.n3.id - 1]) # 0-indexed for np arrays
     def area(self):
         x1, y1 = self.n1.x, self.n1.y
         x2, y2 = self.n2.x, self.n2.y
