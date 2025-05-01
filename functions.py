@@ -135,7 +135,7 @@ def temperature_gradient(mesh, T_global):
     """page 124
     values related to the geometrical center of the element
 
-    temp gradient is constant in the element
+    temp is constant inside the element
 
     Parameters:
     - mesh object, contains elements and nodes coordinates
@@ -146,7 +146,7 @@ def temperature_gradient(mesh, T_global):
 
     logic draft:
     loop over elements in the mesh
-    obtain the local node ids
+    obtain the local node ids 
     get local nodal temperatures from t_global
     get b and c coeffs, and area
     build the matrixes and solve the system

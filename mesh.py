@@ -10,7 +10,7 @@ class Mesh:
         self.nodes = []  # Initialize node list
         self.elements = []
         self.Variation = Variation
-        self.L = L
+        self.L = L #length
         self.create_nodes(N, Variation, L)  # Pass all required parameters
         self.create_elements(N)
         self.neumann_nodes, self.dirichlet_nodes, self.neumann_nodes_inside = self.boundary_conditiones()
@@ -65,7 +65,7 @@ class Mesh:
                 self.nodes.append(Node(i+1,X_p,Y_p))
                
             else:
-                #Regular Mesh   
+                #Regular Mesh -- squared easy mesh
                 self.nodes.append(Node(i+1, x, y))
 
     

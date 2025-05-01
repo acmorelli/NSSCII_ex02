@@ -27,9 +27,8 @@ def main():
     assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
 
     if testing:
-        # Create 2 by 2 mesh
-        N = 100
-        L = 1
+        N = 100 # number of nodes
+        L = 1 # length of squared domain (V0)
         mesh = Mesh(N,'V0', L)
         # mesh.plot_mesh()
         for node in mesh.nodes:
