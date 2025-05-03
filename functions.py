@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.tri as tri
 import os
 
-def compute_local_stiffness_matrix(k,element_id, mesh, Variation=None, id_c=None, ce=None):
+def compute_local_stiffness_matrix(k,element_id, mesh, hz,Variation=None, id_c=None, ce=None):
 
     # k: heat conductivity coefficient
     # tri_id: id of the triangle in the mesh
@@ -37,7 +37,7 @@ def compute_local_stiffness_matrix(k,element_id, mesh, Variation=None, id_c=None
     # see Zienkewicz, page 120 and 125
     for i in range(3):
         for j in range(3):
-            H_e[i][j] = (k / (2*A)) * (b[i]*b[j] + c[i]*c[j]) 
+            H_e[i][j] = (k* hz / (2*A)) * (b[i]*b[j] + c[i]*c[j]) 
 
     return H_e
 
@@ -49,7 +49,7 @@ def compute_free_nodes(H, mesh):
 
     return H_free
 
-def compute_load_vector(H, mesh, q):
+def compute_load_vector(H, mesh, q, hz):
     # f = - integral(N_a * q)
     f = np.zeros(len(mesh.nodes)) # global load vector
     neumann_nodes = mesh.neumann_nodes
@@ -70,28 +70,33 @@ def compute_load_vector(H, mesh, q):
         # find edges on the neumann boundary
         if element.n1 in neumann_nodes and element.n2 in neumann_nodes:
             # edge n1-n2
-
+            print('edge n1-n2', element.id, element.n1, element.n2)
             # edge length
             l = np.sqrt((element.n1.x - element.n2.x)**2 + (element.n1.y - element.n2.y)**2) # length of the edge'
 
             # integral over N_a*q = l/2 * q
-            f_e[0] = l * q * N1(element.n1.x, element.n1.y) # N1 is the basis function for node n1
-            f_e[1] = l * q * N2(element.n2.x, element.n2.y) # N2 is the basis function for node n2
+            #f_e[0] = l * q * N1(element.n1.x, element.n1.y) # N1 is the basis function for node n1
+            #f_e[1] = l * q * N2(element.n2.x, element.n2.y) # N2 is the basis function for node n2
+            f_e[0] =0.5 * l * q * hz
+            f_e[1] = 0.5*l * q * hz
             f_e[2] = 0 # N3 is not on the edge
 
         elif element.n2 in neumann_nodes and element.n3 in neumann_nodes:
             # edge n2-n3
+            print('edge n2-n3', element.id, element.n2, element.n3)
             l = np.sqrt((element.n2.x - element.n3.x)**2 + (element.n2.y - element.n3.y)**2)
             f_e[0] = 0 # N1 is not on the edge
-            f_e[1] = l * q * N2(element.n2.x, element.n2.y) # N2 is the basis function for node n2
-            f_e[2] = l * q * N3(element.n3.x, element.n3.y) # N3 is the basis function for node n3
+            f_e[1] = l * q * N2(element.n2.x, element.n2.y) * hz# N2 is the basis function for node n2
+            f_e[2] = l * q * N3(element.n3.x, element.n3.y) * hz# N3 is the basis function for node n3
 
         elif element.n3 in neumann_nodes and element.n1 in neumann_nodes:
+            print('edge n3-n1', element.id, element.n3, element.n1)
+
             # edge n3-n1
             l = np.sqrt((element.n3.x - element.n1.x)**2 + (element.n3.y - element.n1.y)**2)
-            f_e[0] = l * q * N1(element.n1.x, element.n1.y) # N1 is the basis function for node n1
+            f_e[0] = l * q * N1(element.n1.x, element.n1.y)* hz # N1 is the basis function for node n1
             f_e[1] = 0 # N2 is not on the edge
-            f_e[2] = l * q * N3(element.n3.x, element.n3.y) # N3 is the basis function for node n3
+            f_e[2] = l * q * N3(element.n3.x, element.n3.y)* hz # N3 is the basis function for node n3
 
         f[element.n1.id-1] += f_e[0]
         f[element.n2.id-1] += f_e[1]

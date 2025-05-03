@@ -111,7 +111,7 @@ def main():
     for element_id in range(1, len(mesh.elements) + 1):
 
         # Compute local stiffness matrix for each element
-        H_e = compute_local_stiffness_matrix(k, element_id, mesh, Variation)
+        H_e = compute_local_stiffness_matrix(k, element_id, mesh, hz, Variation)
         
         # Assemble global stiffness matrix
         element_nodes_ids = [mesh.elements[element_id-1].n1.id, mesh.elements[element_id-1].n2.id, mesh.elements[element_id-1].n3.id]
@@ -125,22 +125,51 @@ def main():
     print("H:", H)
     H_free = compute_free_nodes(H, mesh)
     print("H_free:", H_free)
-    f = compute_load_vector(H, mesh, q_neumann)
+    f = compute_load_vector(H, mesh, q_neumann, hz)
+    # # # # # 
+    # FIX FROM GPT
+    # Extract coupling matrix between free and Dirichlet nodes
+    dirichlet_ids = [node.id - 1 for node in mesh.dirichlet_nodes]
+    T_d = np.full(len(dirichlet_ids), T_dirichlet)
+
+    # Free nodes (complement of Dirichlet)
+    all_ids = np.arange(len(mesh.nodes))
+    free_ids = np.setdiff1d(all_ids, dirichlet_ids)
+
+    # Partition matrix
+    H_ff = H[np.ix_(free_ids, free_ids)]
+    H_fd = H[np.ix_(free_ids, dirichlet_ids)]
+
+    # Adjust RHS
+    f_free = f[free_ids] - H_fd @ T_d
+
+    # Solve
+    T_free = np.linalg.solve(H_ff, f_free)
+
+    # Reconstruct full solution
+    T = np.zeros(len(mesh.nodes))
+    T[dirichlet_ids] = T_dirichlet
+    T[free_ids] = T_free
+
+    print('T from gpt', T)
+
+    """
     print("f:", f)
     rhs = compute_rhs(H, mesh, f, T_dirichlet)
     print("rhs:", rhs)
     # solve the system of equations
     T_free = np.linalg.solve(H_free, rhs)
-
+    print("T_free:", T_free)
     # set up complete solution vector
     T = np.zeros(len(mesh.nodes)) 
     free_nodes = np.concatenate([mesh.neumann_nodes_inside, mesh.neumann_nodes])
     for i, node in enumerate(free_nodes):
         T[node.id - 1] = T_free[i]
+        print('node', node, 't_free[i]',T_free[i])
     for node in mesh.dirichlet_nodes:
         T[node.id - 1] = T_dirichlet
     print("T:", T)
-
+    """
 
     reaction_forces = compute_reaction_forces(H, mesh, T)
     print("Reaction forces:", reaction_forces)
