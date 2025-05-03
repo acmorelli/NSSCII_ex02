@@ -162,7 +162,8 @@ def compute_temperature_gradient(mesh, T_global):
         A = element.area()
 
         BC_matrix = np.array([b, c]) # shape: (2, 3)
-        grad_T = (1 / (2 * A)) * BC_matrix @ T_local # shape: (2,)
+        grad_T = (1 / (A)) * BC_matrix @ T_local # shape: (2,)
+        # not divide by two because the coefficients are derived assuming area-normalized shape functions
         print('grad_T', grad_T)
         element.gradient = grad_T
 
@@ -220,7 +221,7 @@ def plot_temperature_gradient(mesh, variation):
 
     # plots
     fig=plt.figure(figsize=(8, 6))
-    plt.quiver(centroids_x, centroids_y, grad_x, grad_y, angles='xy', scale_units='xy', scale=10, color='blue')
+    plt.quiver(centroids_x, centroids_y, grad_x, grad_y, angles='xy', scale_units='xy', scale=100000, color='blue')
     plt.title("Temperature Gradient Vectors at Elements' Centroids")
     plt.xlabel("X")
     plt.ylabel("Y")
@@ -264,6 +265,7 @@ def plot_heat_flux(mesh, variation):
     centroids_y = np.array([element.centroidY for element in mesh.elements])
     flux_x = np.array([element.flux[0]for element in mesh.elements])
     flux_y = np.array([element.flux[1]for element in mesh.elements])
+    print('flux y', flux_y)
     # to plot triangled mesh, get the x and y nodes and the triangles
     node_x = np.array([node.x for node in mesh.nodes])
     node_y = np.array([node.y for node in mesh.nodes])
@@ -273,7 +275,7 @@ def plot_heat_flux(mesh, variation):
 
     # Plot vector field
     fig=plt.figure(figsize=(8, 6))
-    plt.quiver(centroids_x, centroids_y, flux_x, flux_y, angles='xy', scale_units='xy', scale=10, color='blue')
+    plt.quiver(centroids_x, centroids_y, flux_x, flux_y, angles='xy', scale_units='xy', scale=100000000, color='blue')
     plt.title("Heat Flux Vectors at Element Centroids")
     plt.xlabel("X")
     plt.ylabel("Y")

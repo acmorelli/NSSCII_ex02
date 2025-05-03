@@ -183,7 +183,7 @@ def main():
     plot_temperature_field(mesh, T, Variation)
     plot_temperature_gradient(mesh, Variation)
     plot_heat_flux(mesh, Variation)
-    
+    #TODO: add unit and scale legend to the plots
 
 
 if __name__ == "__main__":
