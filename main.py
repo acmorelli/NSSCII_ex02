@@ -58,7 +58,7 @@ def main():
     T_dirichlet = 313.0 # K (Dirichlet bc)
     y_dirichlet = L # y coordinate of the Dirichlet boundary
     hz = 0.01 # m (thickness in z-direction)
-    Variation=  'V0'
+    Variation=  'V4b' # also change the mesh instantiation !!!
     
     """
     # # # debug
@@ -82,8 +82,7 @@ def main():
     #assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
 
     if testing:
-        mesh = Mesh(N,Variation, L, k, y_neumann, y_dirichlet, hz) # add id_c and ce for variation 4
-        #mesh = Mesh(N,Variation= 'V4a', L, k, y_neumann, T_dirichlet, y_dirichlet, hz, id_c, ce) 
+        mesh = Mesh(N,Variation, L, k, y_neumann, y_dirichlet, hz) 
 
         for node in mesh.nodes:
             print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
@@ -111,7 +110,7 @@ def main():
     for element_id in range(1, len(mesh.elements) + 1):
 
         # Compute local stiffness matrix for each element
-        H_e = compute_local_stiffness_matrix(k, element_id, mesh, hz, Variation)
+        H_e = compute_local_stiffness_matrix(k, element_id, mesh, hz, Variation, id_c, ce)
         
         # Assemble global stiffness matrix
         element_nodes_ids = [mesh.elements[element_id-1].n1.id, mesh.elements[element_id-1].n2.id, mesh.elements[element_id-1].n3.id]
