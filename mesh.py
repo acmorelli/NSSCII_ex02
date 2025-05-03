@@ -5,16 +5,16 @@ from matplotlib.tri import Triangulation
 from min_FEM import *
 
 class Mesh:
-    def __init__(self, N, Variation, L):
+    def __init__(self, N, Variation, L,k,y_neumann, y_dirichlet, hz):
         self.N = N
         self.nodes = []  # Initialize node list
         self.elements = []
         self.Variation = Variation
         self.L = L #length
+        self.hz = hz # thickness
         self.create_nodes(N, Variation, L)  # Pass all required parameters
-        self.create_elements(N)
-        self.neumann_nodes, self.dirichlet_nodes, self.neumann_nodes_inside = self.boundary_conditiones()
-    
+        self.create_elements(N, k, hz)
+        self.neumann_nodes, self.dirichlet_nodes, self.neumann_nodes_inside = self.boundary_conditiones(y_neumann, y_dirichlet)
     
     def coordinates(self):
         # Create a grid of points
@@ -65,14 +65,14 @@ class Mesh:
                 self.nodes.append(Node(i+1,X_p,Y_p))
                
             else:
-                #Regular Mesh -- squared easy mesh
+                #Regular Mesh -- squared easy mesh???
                 self.nodes.append(Node(i+1, x, y))
 
     
     def get_node(self, index):
         return self.nodes[index - 1]  # Convert 1-based to 0-based indexing
     
-    def create_elements(self, N):  # Fixed syntax and parameters
+    def create_elements(self, N, k, hz):  # Fixed syntax and parameters
         n = int(math.sqrt(N))
         # Create elements with proper connectivity
         for j in range(n-1):
@@ -83,20 +83,20 @@ class Mesh:
                 node4 = self.get_node((j + 1) * n + i + 2)
                 
                 # Create two triangular elements
-                self.elements.append(Triangle((j*(n-1)+i)*2+1, node1, node2, node3))  # Lower triangle
-                self.elements.append(Triangle((j*(n-1)+i)*2+2, node2, node4, node3))  # Upper triangle
+                self.elements.append(Triangle((j*(n-1)+i)*2+1, node1, node2, node3, k, hz))  # Lower triangle
+                self.elements.append(Triangle((j*(n-1)+i)*2+2, node2, node4, node3, k, hz))  # Upper triangle
                 #print("Node1: ", node1.x, node1.y)
         # print("elements:",self.elements[0].n1.x,self.elements[0].n1.y)
         # print("elements:",self.elements[0].n2.x,self.elements[0].n2.y)
         # print("elements:",self.elements[0].n3.x,self.elements[0].n3.y)
 
     
-    def boundary_conditiones(self):
-        n = int(math.sqrt(self.N))
+    def boundary_conditiones(self, y_neumann, y_dirichlet):
         # Define Dirichlet and Neumann boundary conditions
-        dirichlet_nodes = [self.nodes[i] for i in range(n)]  # nodes 1-10 
-        neumann_nodes = [self.nodes[i] for i in range(self.N-n,self.N)]  # nodes 91-100
-        neumann_nodes_inside = [self.nodes[i] for i in range(n,self.N-n)]  # nodes 11-90
+        dirichlet_nodes = [node for node in self.nodes if node.y == y_dirichlet]
+        neumann_nodes = [node for node in self.nodes if node.y == y_neumann]  
+        neumann_nodes_inside = [node for node in self.nodes if node.id not in ({n.id for n in dirichlet_nodes} | {n.id for n in neumann_nodes})]        
+        #assert len(neumann_nodes_inside) == len(self.nodes) - len(dirichlet_nodes) - len(neumann_nodes), "Mismatch in BCs nodes"
         return neumann_nodes, dirichlet_nodes, neumann_nodes_inside
     
     def plot_mesh(self):

@@ -6,6 +6,38 @@ latter must be equal to the sum of the applied nodal “forces” divided by the
 area.
 • The temperature gradient and the flux, together with eqn. (2) must yield the input for
 the conductivity k.
+
+SI-units to be used:
+    + T in K
+    + L in m
+    + k in W/(mK)
+    + q in W/m^2 - ad Neumann
+    + P in W - ad nodal forces
+
+# Length in x- and y-direction.
+L = 0.1
+
+# Thickness (z-direction).
+hz = 0.01
+
+# Thermal conductivity (k=k_xx=k_yy, k_xy = 0.).
+k = 373.
+
+# Factor c for modifying thermal conductivity k for
+# elements in elements_to_be_modified.
+c = 10.
+
+# Elements to be modified.
+elements_to_be_modified = [
+                          62-70,
+                          83-86,
+                          98-103,
+                          111-122
+                          ]
+
+# Boundary conditions.
+q(y=0) = 1000000.
+T(y=L) = 313.
 """
 # import local files here
 from functions import *
@@ -18,19 +50,41 @@ testing = True
 
 def main():
     
-    k = 1  # Example conductivity coefficient
-    N = 100 # Number of nodes in the mesh 
-    T_dirichlet = 1  # Dirichlet boundary condition value
-    q = 1  # Flux across the Neumann boundary
-    Variation=  'V4b'
+    k = 373  #  W/mK
+    L = 0.1  # m (length of squared domain (V0))
+    N = 100 # Number of nodes in x=0 (V0)
+    q_neumann = 1000000  # w/ m2 (Flux across the Neumann boundary)
+    y_neumann = 0.0 # y coordinate of the Neumann boundary
+    T_dirichlet = 313.0 # K (Dirichlet bc)
+    y_dirichlet = L # y coordinate of the Dirichlet boundary
+    hz = 0.01 # m (thickness in z-direction)
+    Variation=  'V0'
+    
+    """
+    # # # debug
+    L=1
+    k=1
+    q_neumann=1
+    y_neumann= L
+    T_dirichlet = 1
+    y_dirichlet = 0.0
+    """
 
-    assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
+    # # # # variation 4 # # # #
+    id1=np.arange(62,71)
+    id2=np.arange(83,87)
+    id3=np.arange(98,104)
+    id4=np.arange(111,123)
+    id_c= np.concatenate((id1,id2,id3,id4))
+    ce = 10.0 # factor for modifying thermal conductivity k 
+    
+
+    #assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
 
     if testing:
-        N = 100 # number of nodes
-        L = 1 # length of squared domain (V0)
-        mesh = Mesh(N,'V0', L)
-        # mesh.plot_mesh()
+        mesh = Mesh(N,Variation, L, k, y_neumann, y_dirichlet, hz) # add id_c and ce for variation 4
+        #mesh = Mesh(N,Variation= 'V4a', L, k, y_neumann, T_dirichlet, y_dirichlet, hz, id_c, ce) 
+
         for node in mesh.nodes:
             print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
         for element in mesh.elements:
@@ -71,7 +125,7 @@ def main():
     print("H:", H)
     H_free = compute_free_nodes(H, mesh)
     print("H_free:", H_free)
-    f = compute_load_vector(H, mesh, q)
+    f = compute_load_vector(H, mesh, q_neumann)
     print("f:", f)
     rhs = compute_rhs(H, mesh, f, T_dirichlet)
     print("rhs:", rhs)
@@ -94,11 +148,12 @@ def main():
     # post processing
     # TODO: check units
     # TODO: adjust contour plots with fixed colors/ scales
-    temperature_gradient(mesh, T)
-    plot_temperature_field(mesh, T)
-    plot_temperature_gradient(mesh)
-    compute_heat_flux(mesh, k)
-    plot_heat_flux(mesh)
+    compute_temperature_gradient(mesh, T)
+    compute_heat_flux(mesh)
+
+    plot_temperature_field(mesh, T, Variation)
+    plot_temperature_gradient(mesh, Variation)
+    plot_heat_flux(mesh, Variation)
     
 
 
