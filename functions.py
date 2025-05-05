@@ -37,7 +37,7 @@ def compute_local_stiffness_matrix(k,element_id, mesh, hz,Variation=None, id_c=N
     # see Zienkewicz, page 120 and 125
     for i in range(3):
         for j in range(3):
-            H_e[i][j] = (k* hz / (2*A)) * (b[i]*b[j] + c[i]*c[j]) 
+            H_e[i][j] = (element.k* hz / (2*A)) * (b[i]*b[j] + c[i]*c[j]) 
 
     return H_e
 
