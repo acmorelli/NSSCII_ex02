@@ -162,7 +162,7 @@ def compute_temperature_gradient(mesh, T_global):
         A = element.area()
 
         BC_matrix = np.array([b, c]) # shape: (2, 3)
-        grad_T = (1 / (A)) * BC_matrix @ T_local # shape: (2,)
+        grad_T = (1 / (2*A)) * BC_matrix @ T_local # shape: (2,)
         # not divide by two because the coefficients are derived assuming area-normalized shape functions
         print('grad_T', grad_T)
         element.gradient = grad_T
