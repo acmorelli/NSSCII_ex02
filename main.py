@@ -6,6 +6,38 @@ latter must be equal to the sum of the applied nodal “forces” divided by the
 area.
 • The temperature gradient and the flux, together with eqn. (2) must yield the input for
 the conductivity k.
+
+SI-units to be used:
+    + T in K
+    + L in m
+    + k in W/(mK)
+    + q in W/m^2 - ad Neumann
+    + P in W - ad nodal forces
+
+# Length in x- and y-direction.
+L = 0.1
+
+# Thickness (z-direction).
+hz = 0.01
+
+# Thermal conductivity (k=k_xx=k_yy, k_xy = 0.).
+k = 373.
+
+# Factor c for modifying thermal conductivity k for
+# elements in elements_to_be_modified.
+c = 10.
+
+# Elements to be modified.
+elements_to_be_modified = [
+                          62-70,
+                          83-86,
+                          98-103,
+                          111-122
+                          ]
+
+# Boundary conditions.
+q(y=0) = 1000000.
+T(y=L) = 313.
 """
 # import local files here
 from functions import *
@@ -18,19 +50,40 @@ testing = True
 
 def main():
     
-    k = 1  # Example conductivity coefficient
-    N = 100 # Number of nodes in the mesh 
-    T_dirichlet = 1  # Dirichlet boundary condition value
-    q = 1  # Flux across the Neumann boundary
-    Variation=  'V4b'
+    k = 373  #  W/mK
+    L = 0.1  # m (length of squared domain (V0))
+    N = 100 # Number of nodes in x=0 (V0)
+    q_neumann = 1000000  # w/ m2 (Flux across the Neumann boundary)
+    y_neumann = 0.0 # y coordinate of the Neumann boundary
+    T_dirichlet = 313.0 # K (Dirichlet bc)
+    y_dirichlet = L # y coordinate of the Dirichlet boundary
+    hz = 0.01 # m (thickness in z-direction)
+    Variation=  'V4b' # also change the mesh instantiation !!!
+    
+    """
+    # # # debug
+    L=1
+    k=1
+    q_neumann=1
+    y_neumann= L
+    T_dirichlet = 1
+    y_dirichlet = 0.0
+    """
 
-    assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
+    # # # # variation 4 # # # #
+    id1=np.arange(62,71)
+    id2=np.arange(83,87)
+    id3=np.arange(98,104)
+    id4=np.arange(111,123)
+    id_c= np.concatenate((id1,id2,id3,id4))
+    ce = 10.0 # factor for modifying thermal conductivity k 
+    
+
+    #assert np.sqrt(N) % 1 == 0, "N must be a perfect square"
 
     if testing:
-        N = 100 # number of nodes
-        L = 1 # length of squared domain (V0)
-        mesh = Mesh(N,'V0', L)
-        # mesh.plot_mesh()
+        mesh = Mesh(N,Variation, L, k, y_neumann, y_dirichlet, hz) 
+
         for node in mesh.nodes:
             print(f"Node: {node.id}, Coordinates: ({node.x}, {node.y})")
         for element in mesh.elements:
@@ -57,7 +110,7 @@ def main():
     for element_id in range(1, len(mesh.elements) + 1):
 
         # Compute local stiffness matrix for each element
-        H_e = compute_local_stiffness_matrix(k, element_id, mesh, Variation)
+        H_e = compute_local_stiffness_matrix(k, element_id, mesh, hz, Variation, id_c, ce)
         
         # Assemble global stiffness matrix
         element_nodes_ids = [mesh.elements[element_id-1].n1.id, mesh.elements[element_id-1].n2.id, mesh.elements[element_id-1].n3.id]
@@ -71,22 +124,51 @@ def main():
     print("H:", H)
     H_free = compute_free_nodes(H, mesh)
     print("H_free:", H_free)
-    f = compute_load_vector(H, mesh, q)
+    f = compute_load_vector(H, mesh, q_neumann, hz)
+    # # # # # 
+    # FIX FROM GPT
+    # Extract coupling matrix between free and Dirichlet nodes
+    dirichlet_ids = [node.id - 1 for node in mesh.dirichlet_nodes]
+    T_d = np.full(len(dirichlet_ids), T_dirichlet)
+
+    # Free nodes (complement of Dirichlet)
+    all_ids = np.arange(len(mesh.nodes))
+    free_ids = np.setdiff1d(all_ids, dirichlet_ids)
+
+    # Partition matrix
+    H_ff = H[np.ix_(free_ids, free_ids)]
+    H_fd = H[np.ix_(free_ids, dirichlet_ids)]
+
+    # Adjust RHS
+    f_free = f[free_ids] - H_fd @ T_d
+
+    # Solve
+    T_free = np.linalg.solve(H_ff, f_free)
+
+    # Reconstruct full solution
+    T = np.zeros(len(mesh.nodes))
+    T[dirichlet_ids] = T_dirichlet
+    T[free_ids] = T_free
+
+    print('T from gpt', T)
+
+    """
     print("f:", f)
     rhs = compute_rhs(H, mesh, f, T_dirichlet)
     print("rhs:", rhs)
     # solve the system of equations
     T_free = np.linalg.solve(H_free, rhs)
-
+    print("T_free:", T_free)
     # set up complete solution vector
     T = np.zeros(len(mesh.nodes)) 
     free_nodes = np.concatenate([mesh.neumann_nodes_inside, mesh.neumann_nodes])
     for i, node in enumerate(free_nodes):
         T[node.id - 1] = T_free[i]
+        print('node', node, 't_free[i]',T_free[i])
     for node in mesh.dirichlet_nodes:
         T[node.id - 1] = T_dirichlet
     print("T:", T)
-
+    """
 
     reaction_forces = compute_reaction_forces(H, mesh, T)
     print("Reaction forces:", reaction_forces)
@@ -94,12 +176,13 @@ def main():
     # post processing
     # TODO: check units
     # TODO: adjust contour plots with fixed colors/ scales
-    temperature_gradient(mesh, T)
-    plot_temperature_field(mesh, T)
-    plot_temperature_gradient(mesh)
-    compute_heat_flux(mesh, k)
-    plot_heat_flux(mesh)
-    
+    compute_temperature_gradient(mesh, T)
+    compute_heat_flux(mesh)
+
+    plot_temperature_field(mesh, T, Variation)
+    plot_temperature_gradient(mesh, Variation)
+    plot_heat_flux(mesh, Variation)
+    #TODO: add unit and scale legend to the plots
 
 
 if __name__ == "__main__":
