@@ -109,15 +109,16 @@ def compute_rhs(H, mesh, f, T_dirichlet):
     neumann_nodes = mesh.neumann_nodes
     dirichlet_nodes = mesh.dirichlet_nodes
     neumann_nodes_inside = mesh.neumann_nodes_inside
-    free_nodes = np.concatenate([neumann_nodes_inside, neumann_nodes]) 
-
+    # free_nodes = np.concatenate([neumann_nodes_inside, neumann_nodes])
+    free_nodes = np.array([node for node in mesh.nodes if node not in dirichlet_nodes])
     
     # get vector P_11...100 for right hand side
     P_1 = f[[node.id -1 for node in free_nodes]]
+    print("f", f)
+    print('P_1', P_1)
     # get submatrix of H for Neumann nodes (H_1...10,11...100)
     H_neumann = np.delete(H, [node.id-1 for node in dirichlet_nodes], axis=0) # removed rows corresponding to Dirichlet nodes 
     H_neumann = np.delete(H_neumann, [node.id-1 for node in free_nodes], axis=1) # removed columns corresponding to free nodes
-    
     
     T_0 = np.full(len(dirichlet_nodes), T_dirichlet)
 
@@ -164,7 +165,7 @@ def compute_temperature_gradient(mesh, T_global):
         BC_matrix = np.array([b, c]) # shape: (2, 3)
         grad_T = (1 / (2*A)) * BC_matrix @ T_local # shape: (2,)
         # not divide by two because the coefficients are derived assuming area-normalized shape functions
-        print('grad_T', grad_T)
+        # print('grad_T', grad_T)
         element.gradient = grad_T
 
 
