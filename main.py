@@ -50,7 +50,10 @@ testing = True
 
 def main():
     
-    k = 373  #  W/mK
+    k = 373  #  W/mKn
+    # convert to W/K
+    k = k * 1e3 # W/K
+
     L = 0.1  # m (length of squared domain (V0))
     N = 100 # Number of nodes in x=0 (V0)
     q_neumann = 1000000  # w/ m2 (Flux across the Neumann boundary)

@@ -63,9 +63,9 @@ def compute_load_vector(H, mesh, q, hz):
 
         # basis functions
         A = element.area()
-        N1 = lambda x, y: 1/(2*A) * (a1 + b1*x + c1*y)
-        N2 = lambda x, y: 1/(2*A) * (a2 + b2*x + c2*y)
-        N3 = lambda x, y: 1/(2*A) * (a3 + b3*x + c3*y)
+        # N1 = lambda x, y: 1/(2*A) * (a1 + b1*x + c1*y)
+        # N2 = lambda x, y: 1/(2*A) * (a2 + b2*x + c2*y)
+        # N3 = lambda x, y: 1/(2*A) * (a3 + b3*x + c3*y)
 
         # find edges on the neumann boundary
         if element.n1 in neumann_nodes and element.n2 in neumann_nodes:
