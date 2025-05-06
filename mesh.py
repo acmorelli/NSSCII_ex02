@@ -14,8 +14,8 @@ class Mesh:
         self.hz = hz # thickness
         self.create_nodes(N, Variation, L)  # Pass all required parameters
         self.create_elements(N, k, hz)
-        self.neumann_nodes, self.dirichlet_nodes, self.neumann_nodes_inside = self.boundary_conditiones(y_neumann, y_dirichlet)
-    
+        self.neumann_nodes, self.dirichlet_nodes, self.neumann_nodes_inside = self.boundary_conditiones(Variation)
+
     def coordinates(self):
         # Create a grid of points
         x = np.linspace(0, self.L, int(math.sqrt(self.N)))
@@ -47,7 +47,8 @@ class Mesh:
             # print("y", y)
             if Variation == 'V1':
                 # Apply transformation for V1   
-                x =  (1+y) * x/2
+                # x =  (1+y) * x/2
+                x = (L/2 + 0.5*y)*x/L
                 self.nodes.append(Node(i+1, x, y))
                 
             elif Variation == 'V2':
@@ -91,10 +92,19 @@ class Mesh:
         # print("elements:",self.elements[0].n3.x,self.elements[0].n3.y)
 
     
-    def boundary_conditiones(self, y_neumann, y_dirichlet):
+    def boundary_conditiones(self, Variation):
         # Define Dirichlet and Neumann boundary conditions
-        dirichlet_nodes = [node for node in self.nodes if node.y == y_dirichlet]
-        neumann_nodes = [node for node in self.nodes if node.y == y_neumann]  
+        # dirichlet_nodes = [node for node in self.nodes if node.y == y_dirichlet]
+        # neumann_nodes = [node for node in self.nodes if node.y == y_neumann]  
+        dirichlet_nodes = [node for node in self.nodes if node.id in range(91, 101)]
+        neumann_nodes = [node for node in self.nodes if node.id in range(1, 11)]
+
+        if Variation == 'V3':
+            # Apply transformation for V1
+            
+            dirichlet_nodes = [node for node in self.nodes if node.id in range(1, 11)]
+            neumann_nodes = [node for node in self.nodes if node.id in range(91, 101)]
+
         neumann_nodes_inside = [node for node in self.nodes if node.id not in ({n.id for n in dirichlet_nodes} | {n.id for n in neumann_nodes})]        
         #assert len(neumann_nodes_inside) == len(self.nodes) - len(dirichlet_nodes) - len(neumann_nodes), "Mismatch in BCs nodes"
         return neumann_nodes, dirichlet_nodes, neumann_nodes_inside

@@ -61,7 +61,7 @@ def main():
     T_dirichlet = 313.0 # K (Dirichlet bc)
     y_dirichlet = L # y coordinate of the Dirichlet boundary
     hz = 0.01 # m (thickness in z-direction)
-    Variation=  'V0' # also change the mesh instantiation !!!
+    Variation=  'V4b' # also change the mesh instantiation !!!
     
     """
     # # # debug

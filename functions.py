@@ -168,7 +168,6 @@ def compute_temperature_gradient(mesh, T_global):
         # print('grad_T', grad_T)
         element.gradient = grad_T
 
-
 def compute_heat_flux(mesh):
     """ q = -k * grad(T) at the element centroids
     k thermal conductivity constant across the element"""
