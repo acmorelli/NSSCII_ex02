@@ -170,7 +170,8 @@ def compute_temperature_gradient(mesh, T_global):
 
 def compute_heat_flux(mesh):
     """ q = -k * grad(T) at the element centroids
-    k thermal conductivity constant across the element"""
+        - W/mK * K/m² = W/m³
+    """
     for element in mesh.elements:
         #grad_T = element.gradient
         element.flux = -element.k * element.gradient
@@ -191,7 +192,7 @@ values and (bi-linear) interpolation between the nodes"""
     fig=plt.figure(figsize=(8, 6))
     contour = plt.tricontourf(triangulation, T, levels=50, cmap='plasma')
     plt.colorbar(contour, label="Temperature")
-    plt.title("Temperature Field $T(x, y)$")
+    plt.title("Temperature Field $T(x, y) [K]$")
     plt.xlabel("X")
     plt.ylabel("Y")
     plt.axis('equal')
@@ -200,7 +201,7 @@ values and (bi-linear) interpolation between the nodes"""
 
     folder = f"./{variation}_plots"
     os.makedirs(folder, exist_ok=True)
-    fig.savefig(os.path.join(folder, "temp_field_plot.png"), bbox_inches='tight')
+    fig.savefig(os.path.join(folder, f"{variation}_temp_field_plot.png"), bbox_inches='tight')
     plt.close(fig)
 
 def plot_temperature_gradient(mesh, variation):
@@ -221,15 +222,15 @@ def plot_temperature_gradient(mesh, variation):
 
     # plots
     fig=plt.figure(figsize=(8, 6))
-    plt.quiver(centroids_x, centroids_y, grad_x, grad_y, angles='xy', scale_units='xy', scale=100000, color='blue')
-    plt.title("Temperature Gradient Vectors at Elements' Centroids")
+    plt.quiver(centroids_x, centroids_y, grad_x, grad_y, angles='xy', scale_units='xy', scale=1, color='blue')
+    plt.title("Temperature Gradient Vectors at Elements' Centroids [K/m²]")
     plt.xlabel("X")
     plt.ylabel("Y")
     plt.axis("equal")
     plt.grid(False)
     plt.show()    
     
-    fig.savefig(os.path.join(folder, "temp_grad_vector_plot.png"), bbox_inches='tight')
+    fig.savefig(os.path.join(folder, f"{variation}_temp_grad_vector_plot.png"), bbox_inches='tight')
     plt.close(fig)
 
     # extra contour for each component of the temp gradient
@@ -238,7 +239,7 @@ def plot_temperature_gradient(mesh, variation):
    # ∂T/∂x
     tpc1 = axs[0].tripcolor(triangulation, facecolors=np.round(grad_x, 7), edgecolors='k',
                          shading='flat', cmap='viridis')
-    fig.colorbar(tpc1, ax=axs[0], label="$\\partial T/\\partial x$")
+    fig.colorbar(tpc1, ax=axs[0], label="$\\partial T/\\partial x$ [K/m²]")
     axs[0].set_title("∂T/∂x Per Element")
     axs[0].set_xlabel("X")
     axs[0].set_ylabel("Y")
@@ -247,14 +248,14 @@ def plot_temperature_gradient(mesh, variation):
     # ∂T/∂y
     tpc2 = axs[1].tripcolor(triangulation, facecolors=np.round(grad_y, 7), edgecolors='k',
                          shading='flat', cmap='plasma')
-    fig.colorbar(tpc2, ax=axs[1], label="$\\partial T/\\partial y$")
+    fig.colorbar(tpc2, ax=axs[1], label="$\\partial T/\\partial y$ [K/m²]")
     axs[1].set_title("∂T/∂y Per Element")
     axs[1].set_xlabel("X")
     axs[1].set_ylabel("Y")
     axs[1].axis("equal")
     plt.show()
 
-    fig.savefig(os.path.join(folder, "components_temp_grad.png"), bbox_inches='tight')
+    fig.savefig(os.path.join(folder, f"{variation}components_temp_grad.png"), bbox_inches='tight')
 
 
 def plot_heat_flux(mesh, variation):
@@ -275,15 +276,15 @@ def plot_heat_flux(mesh, variation):
 
     # Plot vector field
     fig=plt.figure(figsize=(8, 6))
-    plt.quiver(centroids_x, centroids_y, flux_x, flux_y, angles='xy', scale_units='xy', scale=100000000, color='blue')
-    plt.title("Heat Flux Vectors at Element Centroids")
+    plt.quiver(centroids_x, centroids_y, flux_x, flux_y, angles='xy', scale_units='xy', scale=1, color='blue')
+    plt.title("Heat Flux Vectors at Element Centroids [W/m³]")
     plt.xlabel("X")
     plt.ylabel("Y")
     plt.axis("equal")
     plt.grid(False)
     plt.show()
 
-    fig.savefig(os.path.join(folder, "flux_vector_plot.png"), bbox_inches='tight')
+    fig.savefig(os.path.join(folder, f"{variation}_flux_vector_plot.png"), bbox_inches='tight')
     plt.close(fig)
 
     # extra contour for each component of the heat flux
@@ -307,21 +308,20 @@ def plot_heat_flux(mesh, variation):
     tpc_y = axs[1].tripcolor(triangulation, facecolors=rounded_flux_y, edgecolors='k',
                              shading='flat', cmap='plasma')
     fig.colorbar(tpc_y, ax=axs[1], label="q in y direction")
-    axs[1].set_title("Heat Flux in Y Per Element")
+    axs[1].set_title("Heat Flux in Y Per Element [W/m³]")
     axs[1].set_xlabel("X")
     axs[1].set_ylabel("Y")
     axs[1].axis('equal')
     axs[1].grid(False)
 
     plt.show()
-    fig.savefig(os.path.join(folder, "flux_components_plot.png"), bbox_inches='tight')
+    fig.savefig(os.path.join(folder, f"{variation}_flux_components_plot.png"), bbox_inches='tight')
     plt.close(fig)
 
 def plot_temperature_gradients_and_fluxes():
     """Plot the temperature gradients and fluxes at the element centroids as vector plots 
     (and, optionally,their components as contour plots without interpolation, i.e. constant 
     for each element)."""
-
     pass
 
 def compare_fluxes():
