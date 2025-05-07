@@ -191,10 +191,10 @@ values and (bi-linear) interpolation between the nodes"""
 
     fig=plt.figure(figsize=(8, 6))
     contour = plt.tricontourf(triangulation, T, levels=50, cmap='plasma')
-    plt.colorbar(contour, label="Temperature")
-    plt.title("Temperature Field $T(x, y) [K]$")
-    plt.xlabel("X")
-    plt.ylabel("Y")
+    plt.colorbar(contour, label="Temperature [K]")
+    plt.title("Temperature Field $T(x, y)$")
+    plt.xlabel("X [m]")
+    plt.ylabel("Y [m]")
     plt.axis('equal')
     plt.grid(False)
     plt.show()
@@ -222,12 +222,14 @@ def plot_temperature_gradient(mesh, variation):
 
     # plots
     fig=plt.figure(figsize=(8, 6))
-    plt.quiver(centroids_x, centroids_y, grad_x, grad_y, angles='xy', scale_units='xy', scale=1, color='blue')
+    plt.quiver(centroids_x, centroids_y, grad_x, grad_y, angles='xy', scale_units='xy', scale=10000, color='blue')
     plt.title("Temperature Gradient Vectors at Elements' Centroids [K/m²]")
     plt.xlabel("X")
     plt.ylabel("Y")
     plt.axis("equal")
     plt.grid(False)
+    plt.subplots_adjust(bottom=0.15, top=0.85)
+    plt.suptitle("Vector Scale = 10000", fontsize=10, y=0.95)
     plt.show()    
     
     fig.savefig(os.path.join(folder, f"{variation}_temp_grad_vector_plot.png"), bbox_inches='tight')
@@ -276,12 +278,14 @@ def plot_heat_flux(mesh, variation):
 
     # Plot vector field
     fig=plt.figure(figsize=(8, 6))
-    plt.quiver(centroids_x, centroids_y, flux_x, flux_y, angles='xy', scale_units='xy', scale=1, color='blue')
+    plt.quiver(centroids_x, centroids_y, flux_x, flux_y, angles='xy', scale_units='xy', scale=10000, color='blue')
     plt.title("Heat Flux Vectors at Element Centroids [W/m³]")
     plt.xlabel("X")
     plt.ylabel("Y")
     plt.axis("equal")
     plt.grid(False)
+    plt.subplots_adjust(bottom=0.15, top=0.85)
+    plt.suptitle("Vector Scale = 10000", fontsize=10, y=0.95)
     plt.show()
 
     fig.savefig(os.path.join(folder, f"{variation}_flux_vector_plot.png"), bbox_inches='tight')
@@ -297,7 +301,7 @@ def plot_heat_flux(mesh, variation):
     tpc_x = axs[0].tripcolor(triangulation, facecolors=rounded_flux_x, edgecolors='k',
                              shading='flat', cmap='viridis')
     fig.colorbar(tpc_x, ax=axs[0], label="q in x direction")
-    axs[0].set_title("Heat Flux in X Per Element")
+    axs[0].set_title("Heat Flux in X Per Element [W/m³]")
     axs[0].set_xlabel("X")
     axs[0].set_ylabel("Y")
     axs[0].axis('equal')

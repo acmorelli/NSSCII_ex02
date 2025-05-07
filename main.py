@@ -56,12 +56,12 @@ def main():
 
     L = 0.1  # m (length of squared domain (V0))
     N = 100 # Number of nodes in x=0 (V0)
-    q_neumann = 1000000  # w/ m2 (Flux across the Neumann boundary)
+    hz = 0.01 # m (thickness in z-direction)
+    q_neumann = 1000000*hz  # m* w/ m2 (Flux across the Neumann boundary)
     y_neumann = 0.0 # y coordinate of the Neumann boundary
     T_dirichlet = 313.0 # K (Dirichlet bc)
     y_dirichlet = L # y coordinate of the Dirichlet boundary
-    hz = 0.01 # m (thickness in z-direction)
-    Variation=  'V4b' # 'V1', 'V2', 'V3', 'V4a', 'V4b' (for the mesh)
+    Variation=  '0' # 'V1', 'V2', 'V3', 'V4a', 'V4b' (for the mesh)
     
     """
     # # # debug
@@ -184,9 +184,8 @@ def main():
     compute_heat_flux(mesh)
 
     plot_temperature_field(mesh, T, Variation)
-    # plot_temperature_gradient(mesh, Variation)
-    # plot_heat_flux(mesh, Variation)
-    #TODO: add unit and scale legend to the plots
+    plot_temperature_gradient(mesh, Variation)
+    #plot_heat_flux(mesh, Variation)
 
 
 if __name__ == "__main__":
