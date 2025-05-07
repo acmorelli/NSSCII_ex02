@@ -61,7 +61,7 @@ def main():
     y_neumann = 0.0 # y coordinate of the Neumann boundary
     T_dirichlet = 313.0 # K (Dirichlet bc)
     y_dirichlet = L # y coordinate of the Dirichlet boundary
-    Variation=  '0' # 'V1', 'V2', 'V3', 'V4a', 'V4b' (for the mesh)
+    Variation=  'V4b' # 'V0', 'V1', 'V2', 'V3', 'V4a', 'V4b' (for the mesh)
     
     """
     # # # debug
@@ -185,7 +185,7 @@ def main():
 
     plot_temperature_field(mesh, T, Variation)
     plot_temperature_gradient(mesh, Variation)
-    #plot_heat_flux(mesh, Variation)
+    plot_heat_flux(mesh, Variation)
 
 
 if __name__ == "__main__":
