@@ -44,6 +44,7 @@ from functions import *
 from mesh import Mesh
 import numpy as np
 import matplotlib.pyplot as plt
+from print_HTP_2025 import print_HTP
 
 
 testing = True
@@ -61,7 +62,7 @@ def main():
     T_dirichlet = 313.0 # K (Dirichlet bc)
     y_dirichlet = L # y coordinate of the Dirichlet boundary
     hz = 0.01 # m (thickness in z-direction)
-    Variation=  'V4b' # also change the mesh instantiation !!!
+    Variation=  'V0' # also change the mesh instantiation !!!
     
     """
     # # # debug
@@ -177,17 +178,28 @@ def main():
     reaction_forces = compute_reaction_forces(H, mesh, T)
     print("Reaction forces:", reaction_forces)
 
+    # add reaction forces to force vector
+    counter = 0
+    for node in mesh.nodes:
+        if node in mesh.dirichlet_nodes:
+            f[node.id - 1] += reaction_forces[counter]
+            counter += 1
+    print("Updated force vector:", f)
+
     # post processing
-    # TODO: check units
-    # TODO: adjust contour plots with fixed colors/ scales
     compute_temperature_gradient(mesh, T)
     compute_heat_flux(mesh)
 
+
+    # plotting
     plot_temperature_field(mesh, T, Variation)
     # plot_temperature_gradient(mesh, Variation)
     # plot_heat_flux(mesh, Variation)
-    #TODO: add unit and scale legend to the plots
-
+    
+    # save results to file
+    filename = "output_" + Variation + ".txt"
+    print_HTP(H, np.reshape(T, (-1,1)), np.reshape(f, (-1,1)), filename)
+    print(f"Results saved to {filename}")
 
 if __name__ == "__main__":
     main()
